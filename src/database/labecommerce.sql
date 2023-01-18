@@ -37,6 +37,36 @@ SELECT * FROM products;
 
 DROP TABLE products;
 
+CREATE TABLE purchases (
+    id TEXT PRIMARY KEY UNIQUE NOT NULL,
+    total_price REAL UNIQUE NOT NULL,
+    paid INTEGER NOT NULL,
+    delivered_at TEXT,
+    buyer_id TEXT NOT NULL,
+    FOREIGN KEY (buyer_id) REFERENCES users(id)
+);
+
+INSERT INTO purchases (id, total_price, paid, buyer_id)
+VALUES
+    ("p001", 350.00, 0, "001"),
+    ("p002", 2700.00, 0, "001"),
+    ("p003", 5499.99, 0, "002"),
+    ("p004", 549.99, 0, "002"),
+    ("p005", 199.99, 0, "003");
+
+SELECT * FROM purchases;
+
+DROP TABLE purchases;
+
+UPDATE purchases
+SET delivered_at = DATETIME("now")
+WHERE id = "p001";
+
+SELECT * FROM users
+INNER JOIN purchases
+ON purchases.buyer_id = users.id
+WHERE users.id = "003";
+
 -- GET ALL PRODUCTS
 SELECT * FROM products;
 
