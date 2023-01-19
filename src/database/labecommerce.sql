@@ -2,16 +2,18 @@
 
 CREATE TABLE users (
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
+    name TEXT NOT NULL, 
     email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    created_at TEXT NOT NULL
 );
 
 PRAGMA table_info ("users");
 
-INSERT INTO users (id, email, password)
-VALUES ("001", "fulano@gmail.com", "123456"),
-("002", "ciclano@gmail.com", "654321"),
-("003", "beltrano@gmail.com", "112233445566");
+INSERT INTO users (id, name, email, password, created_at)
+VALUES ("u001", "Fulano", "fulano@gmail.com", "123456", DATETIME("now", "localtime")),
+("u002", "Ciclano", "ciclano@gmail.com", "654321", DATETIME("now", "localtime")),
+("u003", "Beltrano", "beltrano@gmail.com", "112233445566", DATETIME("now", "localtime"));
 
 SELECT * FROM users;
 
@@ -21,17 +23,19 @@ CREATE TABLE products (
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
     name TEXT NOT NULL,
     price REAL NOT NULL,
-    category TEXT NOT NULL
+    category TEXT NOT NULL,
+    description TEXT NOT NULL,
+    image_url, TEXT NOT NULL
 );
 
 PRAGMA table_info ("products");
 
-INSERT INTO products (id, name, price, category)
-VALUES ("001", "The Last of Us - Part II", 199.99, "Games"),
-("002", "Playstation 5", 5499.99, "Electronics"),
-("003", "Headset JBL", 350.00, "Accessories"),
-("004", "Samsung SMARTV UltraHD 4K HDR", 2700.00, "Electronics"),
-("005", "Cadeira Gamer Thunder X3", 549.99, "Accessories");
+INSERT INTO products (id, name, price, category, description)
+VALUES ("p001", "The Last of Us - Part II", 199.99, "Games", ""),
+("p002", "Playstation 5", 5499.99, "Electronics"),
+("p003", "Headset JBL", 350.00, "Accessories"),
+("p004", "Samsung SMARTV UltraHD 4K HDR", 2700.00, "Electronics"),
+("p005", "Cadeira Gamer Thunder X3", 549.99, "Accessories");
 
 SELECT * FROM products;
 
@@ -66,6 +70,30 @@ SELECT * FROM users
 INNER JOIN purchases
 ON purchases.buyer_id = users.id
 WHERE users.id = "003";
+
+CREATE TABLE purchases_products(
+    purchase_id TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    FOREIGN KEY (purchase_id) REFERENCES purchases(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+INSERT INTO purchases_products (purchase_id, product_id, quantity)
+VALUES
+    ("p001", "003", 1),
+    ("p002", "004", 1),
+    ("p003", "002", 1),
+    ("p004", "005", 1),
+    ("p005", "001", 1);
+
+SELECT * FROM purchases_products;
+
+SELECT * FROM purchases_products
+INNER JOIN purchases
+ON purchases_products.purchase_id = purchases.id
+INNER JOIN products
+ON purchases_products.product_id = products.id;
 
 -- GET ALL PRODUCTS
 SELECT * FROM products;
