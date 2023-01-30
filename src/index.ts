@@ -1,20 +1,7 @@
-import { TUser, TProduct, TPurchase, PRODUCT_CATEGORIES } from "./types"
-import { users, products, purchases } from "./database"
+import { TUser, TProduct, TPurchase } from "./types"
 import express, {Request, Response} from "express"
 import cors from "cors"
-import knex from "knex"
-
-export const db = knex({
-    client:"sqlite3",
-    connection:{
-        filename: "./src/database/newLabecommerce.db"
-    },
-    useNullAsDefault: true,
-    pool:{
-        min:0,
-        max:1
-    }
-})
+import { db } from "./database/knex"
 
 const app = express()
 
@@ -31,12 +18,11 @@ app.get('/ping', (req: Request, res: Response) => {
     res.status(200).send('Pong!')
 })
 
-
 // GET ALL USERS
 
 app.get('/users', async (req: Request, res: Response) => {
     try{
-        const result = await db("users")
+        const result = await db("users")       
 
         res.status(200).send(result)
 
@@ -176,17 +162,14 @@ app.post('/users', async (req: Request, res: Response) => {
 
 app.post('/products', async (req: Request, res: Response) => {
     try{
-        const {id, name, price, category} = req.body
+        const {id, name, price, description, imageUrl} = req.body
 
         if(typeof req.body.id !== "string"){
             res.status(400)
             throw new Error("'id' inválido. Deve estar no formato 'string'.")
         }
 
-        const [findId] = await db.raw(`
-            SELECT * FROM products
-            WHERE id = "${req.body.id}";
-        `)    
+        const [findId] = await db("products").where({id})    
 
         if(findId){
             res.status(400)
@@ -203,23 +186,25 @@ app.post('/products', async (req: Request, res: Response) => {
             throw new Error("'price' inválido. Deve estar no formato 'number'.")
         }
 
-        if(typeof req.body.category !== "string"){
+        if(typeof req.body.description !== "string"){
             res.status(400)
-            throw new Error("'category' inválido. Deve estar no formato 'string'.")
+            throw new Error("'description' inválido. Deve estar no formato 'string'.")
+        }
+
+        if(typeof req.body.imageUrl !== "string"){
+            res.status(400)
+            throw new Error("'imageUrl' inválido. Deve estar no formato 'string'.")
         }
 
         const newProduct: TProduct = {
             id,
             name,
             price,
-            category
+            description,
+            image_url: imageUrl
         }
 
-        await db.raw(`
-            INSERT INTO products (id, name, price, category)
-            VALUES
-                ("${newProduct.id}", "${newProduct.name}", ${newProduct.price}, "${newProduct.category}");
-        `)
+        await db("products").insert(newProduct)
 
         res.status(201).send('Produto cadastrado com sucesso.')
 
@@ -568,22 +553,30 @@ app.put('/products/:id', async (req: Request, res: Response) => {
             }
         }             
 
-        const newCategory = req.body.category      
-        
-        if(newCategory !== undefined){
-            if( newCategory !== PRODUCT_CATEGORIES.ACCESSORIES &&
-                newCategory !== PRODUCT_CATEGORIES.GAMES &&
-                newCategory !== PRODUCT_CATEGORIES.ELECTRONICS){
-                    res.status(400)
-                    throw new Error("'category' inválido. Deve ser 'Acessórios', 'Roupas e Calçados' ou 'Eletrônicos'.")
-                }           
-        }
+        const newDescription = req.body.description
+
+        if(newDescription !== undefined){
+            if(typeof newDescription !== "string"){
+                res.status(400)
+                throw new Error("'description' inválido. Deve estar no formato 'string'.")
+            }
+        } 
+
+        const newImageUrl = req.body.imageUrl
+
+        if(newImageUrl !== undefined){
+            if(typeof newImageUrl !== "string"){
+                res.status(400)
+                throw new Error("'imageUrl' inválido. Deve estar no formato 'string'.")
+            }
+        } 
 
         if(productExists){
             await db("products").update({
                 name: newName || productExists.name,
                 price: newPrice || productExists.price,
-                category: newCategory || productExists.category
+                description: newDescription || productExists.description,
+                image_url: newImageUrl || productExists.image_url
             }).where({id: idToBeEdited})           
 
             res.status(200).send('Produto atualizado com sucesso.')
@@ -643,4 +636,35 @@ app.get("/purchases/:id", async (req: Request, res: Response) => {
             res.send("Erro inesperado")
         }
     }
+})
+
+// DELETE PURCHASE BY ID
+app.delete('/purchases/:id', async (req: Request, res: Response) => {
+    try{
+        const idToDelete = req.params.id
+
+        const [purchaseExists] = await db("purchases").where({id: idToDelete})
+
+        if(!purchaseExists){
+            res.status(404)
+            throw new Error("Pedido não encontrado.")
+        } 
+
+        await db("purchases").del().where({id: idToDelete})
+
+        res.status(200).send('Pedido deletado com sucesso.')             
+
+    } catch (error) {
+        console.log(error)
+
+        if (res.statusCode === 200) {
+            res.status(500)
+        }
+        
+        if (error instanceof Error) {
+            res.send(error.message)
+        } else {
+            res.send("Erro inesperado")
+        }
+    }     
 })

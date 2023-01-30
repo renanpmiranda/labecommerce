@@ -1,8 +1,8 @@
-export enum PRODUCT_CATEGORIES {
-    ACCESSORIES = "Accessories",
-    GAMES = "Games",
-    ELECTRONICS = "Electronics"
-}
+// export enum PRODUCT_CATEGORIES {
+//     ACCESSORIES = "Accessories",
+//     GAMES = "Games",
+//     ELECTRONICS = "Electronics"
+// }
 
 export type TUser = {
     id: string,
@@ -16,7 +16,8 @@ export type TProduct = {
     id: string,
     name: string,
     price: number,
-    category: PRODUCT_CATEGORIES
+    description: string,
+    image_url: string
 }
 
 export type TPurchase = {

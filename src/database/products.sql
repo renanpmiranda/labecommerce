@@ -4,17 +4,18 @@ CREATE TABLE products (
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
     name TEXT NOT NULL,
     price REAL NOT NULL,
-    category TEXT NOT NULL
+    description TEXT NOT NULL,
+    image_url TEXT NOT NULL
 );
 
 PRAGMA table_info ("products");
 
-INSERT INTO products (id, name, price, category)
-VALUES ("p001", "The Last of Us - Part II", 199.99, "Games"),
-("p002", "Playstation 5", 5499.99, "Electronics"),
-("p003", "Headset JBL", 350.00, "Accessories"),
-("p004", "Samsung SMARTV UltraHD 4K HDR", 2700.00, "Electronics"),
-("p005", "Cadeira Gamer Thunder X3", 549.99, "Accessories");
+INSERT INTO products (id, name, price, description, image_url)
+VALUES ("p001", "The Last of Us - Part II", 199.99, "Jogo para PlayStation 4/5", "https://picsum.photos/200/300"),
+("p002", "PlayStation 5", 5499.99, "Console Sony PlayStation 5", "https://picsum.photos/200/300"),
+("p003", "Headset JBL", 350.00, "Fones de Ouvido Headset JBL", "https://picsum.photos/200/300"),
+("p004", "Samsung SMARTV UltraHD 4K HDR", 2700.00, "Televisão Samsung de Alta Definição", "https://picsum.photos/200/300"),
+("p005", "Cadeira Gamer Thunder X3", 549.99, "Cadeira Ergométrica", "https://picsum.photos/200/300");
 
 SELECT * FROM products;
 
